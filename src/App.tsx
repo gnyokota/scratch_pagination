@@ -12,7 +12,10 @@ export type Todo = {
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [minPagesLimit, setMinPagesLimit] = useState(1);
+  const [maxPagesLimit, setMaxPagesLimit] = useState(10);
+
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const getData = async () => {
@@ -34,19 +37,42 @@ function App() {
     setCurrentPage(+event.currentTarget.id);
   };
 
+  const handlePrevious = (event: React.MouseEvent<HTMLElement>) => {
+    if (minPagesLimit > 1) {
+      setMinPagesLimit((prev) => prev - 1);
+      setMaxPagesLimit((prev) => prev - 1);
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNext = (event: React.MouseEvent<HTMLElement>) => {
+    if (maxPagesLimit < getPagesNumber) {
+      setMinPagesLimit((prev) => prev + 1);
+      setMaxPagesLimit((prev) => prev + 1);
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
   return (
-    <div className="App">
-      <h1 className="title">Todo list</h1>
+    <div className="app">
+      <h1 className="title">TODO LIST</h1>
       <ol className="todosList">
-        {currentItems.map((item) => (
-          <TodoItem data={item} />
-        ))}
+        <span>
+          {currentItems.map((item) => (
+            <TodoItem data={item} />
+          ))}
+        </span>
       </ol>
 
       <ul className="pagination">
-        <li>Previous</li>
-        <Pagination pageNumber={getPagesNumber} currentPage={currentPage} onChangePage={onChangePage} />
-        <li>Next</li>
+        <li onClick={handlePrevious}>PREVIOUS</li>
+        <Pagination
+          currentPage={currentPage}
+          minPagesLimit={minPagesLimit}
+          maxPagesLimit={maxPagesLimit}
+          onChangePage={onChangePage}
+        />
+        <li onClick={handleNext}>NEXT</li>
       </ul>
     </div>
   );

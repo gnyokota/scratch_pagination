@@ -1,29 +1,37 @@
 import styles from "./Pagination.module.css";
 
 const Pagination = ({
-  pageNumber = 1,
   currentPage,
+  minPagesLimit,
+  maxPagesLimit,
   onChangePage,
 }: {
-  pageNumber: number;
   currentPage: number;
+  minPagesLimit: number;
+  maxPagesLimit: number;
   onChangePage: (event: React.MouseEvent<HTMLElement>) => void;
 }) => {
   return (
     <div className={styles.pageNumber}>
-      {Array.from({length: pageNumber}, (_, k) => k + 1).map((page: number) => (
-        <li
-          key={page}
-          id={page.toString()}
-          onClick={onChangePage}
-          className={currentPage === pageNumber ? "active" : ""}
-        >
-          {page}
-        </li>
-      ))}
+      {Array.from(
+        {length: maxPagesLimit - minPagesLimit + 1},
+        (_, i) => i + minPagesLimit
+      ).map(
+        (page: number) =>
+          page < maxPagesLimit + 1 &&
+          page > minPagesLimit - 1 && (
+            <li
+              key={page}
+              id={page.toString()}
+              onClick={onChangePage}
+              className={currentPage === page ? styles.active : ""}
+            >
+              {page}
+            </li>
+          )
+      )}
     </div>
   );
 };
-//14:25
 
 export default Pagination;
