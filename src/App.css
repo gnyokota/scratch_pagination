@@ -1,0 +1,20 @@
+.title {
+  margin: 1rem;
+  text-align: center;
+}
+
+.todosList {
+  margin: 1rem 5rem;
+  width: 70 vw;
+}
+
+.pagination {
+  list-style: none;
+  display: flex;
+}
+
+.pagination li {
+  padding: 10px;
+  border: 1px solid black;
+  cursor: pointer;
+}
