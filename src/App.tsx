@@ -18,9 +18,11 @@ function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [minPagesLimit, setMinPagesLimit] = useState(1);
-  const [maxPagesLimit, setMaxPagesLimit] = useState(10);
+
+  const ITEMS_PER_PAGE = 8;
+  const getPagesNumber = todos.length / ITEMS_PER_PAGE;
+  const [maxPagesLimit, setMaxPagesLimit] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-  const [pagesNumber, setPagesNumber] = useState();
 
   const data = useFetch("https://jsonplaceholder.typicode.com/todos");
   const [searchParams] = useSearchParams();
@@ -31,7 +33,8 @@ function App() {
       item.title.includes(searchTerm)
     );
     setTodos(filteredData);
-  }, [data]);
+    setMaxPagesLimit(getPagesNumber > 10 ? 10 : getPagesNumber);
+  }, [data, searchTerm, getPagesNumber]);
 
   useEffect(() => {
     const handleSearchTerm = () =>
@@ -39,10 +42,6 @@ function App() {
     handleSearchTerm();
   }, [searchString]);
 
-  const ITEMS_PER_PAGE = 8;
-  const getPagesNumber = todos.length / ITEMS_PER_PAGE;
-
-  console.log(getPagesNumber);
   const getLastIndexPerPage = currentPage * ITEMS_PER_PAGE;
   const getFirstIndexPerPage = getLastIndexPerPage - ITEMS_PER_PAGE;
   const currentItems = todos.slice(getFirstIndexPerPage, getLastIndexPerPage);
@@ -86,16 +85,18 @@ function App() {
         </span>
       </ol>
 
-      <ul className="pagination">
-        <li onClick={handlePrevious}>PREVIOUS</li>
-        <Pagination
-          currentPage={currentPage}
-          minPagesLimit={minPagesLimit}
-          maxPagesLimit={maxPagesLimit}
-          onChangePage={onChangePage}
-        />
-        <li onClick={handleNext}>NEXT</li>
-      </ul>
+      {getPagesNumber > 1 && (
+        <ul className="pagination">
+          <li onClick={handlePrevious}>PREVIOUS</li>
+          <Pagination
+            currentPage={currentPage}
+            minPagesLimit={minPagesLimit}
+            maxPagesLimit={maxPagesLimit}
+            onChangePage={onChangePage}
+          />
+          <li onClick={handleNext}>NEXT</li>
+        </ul>
+      )}
     </div>
   );
 }
