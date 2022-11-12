@@ -1,7 +1,12 @@
-import {useEffect, useState} from "react";
-import "./App.css";
+import {useState, useEffect} from "react";
+import {useSearchParams} from "react-router-dom";
+
+import useFetch from "./hooks/useFetch";
 import Pagination from "./Pagination/Pagination";
 import TodoItem from "./Todo/Todo";
+
+import "./App.css";
+import SearchField from "./search/SearchField";
 
 export type Todo = {
   id: number;
@@ -14,23 +19,32 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [minPagesLimit, setMinPagesLimit] = useState(1);
   const [maxPagesLimit, setMaxPagesLimit] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pagesNumber, setPagesNumber] = useState();
 
-  const itemsPerPage = 8;
+  const data = useFetch("https://jsonplaceholder.typicode.com/todos");
+  const [searchParams] = useSearchParams();
+  const searchString = searchParams.get("search_query");
 
   useEffect(() => {
-    const getData = async () => {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/todos"
-      );
-      const data = await response.json();
-      setTodos(data);
-    };
-    getData();
-  }, []);
+    const filteredData = data.filter((item: Todo) =>
+      item.title.includes(searchTerm)
+    );
+    setTodos(filteredData);
+  }, [data]);
 
-  const getPagesNumber = todos.length / itemsPerPage;
-  const getLastIndexPerPage = currentPage * itemsPerPage;
-  const getFirstIndexPerPage = getLastIndexPerPage - itemsPerPage;
+  useEffect(() => {
+    const handleSearchTerm = () =>
+      setSearchTerm(searchString?.split(",")[0] ?? "");
+    handleSearchTerm();
+  }, [searchString]);
+
+  const ITEMS_PER_PAGE = 8;
+  const getPagesNumber = todos.length / ITEMS_PER_PAGE;
+
+  console.log(getPagesNumber);
+  const getLastIndexPerPage = currentPage * ITEMS_PER_PAGE;
+  const getFirstIndexPerPage = getLastIndexPerPage - ITEMS_PER_PAGE;
   const currentItems = todos.slice(getFirstIndexPerPage, getLastIndexPerPage);
 
   const onChangePage = (event: React.MouseEvent<HTMLElement>) => {
@@ -53,13 +67,21 @@ function App() {
     }
   };
 
+  const handleSearchOnChange = (event: React.FormEvent<HTMLInputElement>) => {
+    setSearchTerm(event.currentTarget.value);
+  };
+
   return (
     <div className="app">
       <h1 className="title">TODO LIST</h1>
+      <SearchField
+        searchTerm={searchTerm}
+        handleSearchOnChange={handleSearchOnChange}
+      />
       <ol className="todosList">
         <span>
           {currentItems.map((item) => (
-            <TodoItem data={item} />
+            <TodoItem key={item.id} data={item} />
           ))}
         </span>
       </ol>
